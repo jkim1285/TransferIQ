@@ -18,8 +18,8 @@ import {
 import { createClient } from '@supabase/supabase-js';
 
 // ── Supabase 설정 ──────────────────────────────────────────
-const SUPABASE_URL = 'https://fwlleigtngjklisivobo.supabase.co'; // 공백없이
-const SUPABASE_KEY = 'sb_publishable_IxQO0aPsYJlxvRQVE4xjAw_W7ZGrJVz';
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ──────────────────────────────────────────────────────────
 
