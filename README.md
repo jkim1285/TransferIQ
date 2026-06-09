@@ -43,6 +43,15 @@ All providers are benchmarked against a **single ExchangeRate-API live mid-marke
 
 ---
 
+## 📸 Screenshots
+
+![Main](screenshots/screenshot_main.jpg)
+![Compare](screenshots/screenshot_compare.jpg)
+![Remit](screenshots/screenshot_remit.jpg)
+![Crypto](screenshots/screenshot_crypto.jpg)
+
+---
+
 ## ⚠️ Disclaimer
 
 Estimates only. Final amounts may differ due to local taxes, banking regulations, and country-specific policies. Not all providers support every currency pair. Always confirm on the official provider site before sending.
