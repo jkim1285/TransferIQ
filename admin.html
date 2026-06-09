@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransferIQ Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg: #0A0A0A;
+    --card: #111111;
+    --border: #1E1E1E;
+    --accent: #00C2FF;
+    --good: #00FF88;
+    --warn: #FFB020;
+    --danger: #FF4444;
+    --text: #EEEEEE;
+    --muted: #555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .dot.live { background: var(--good); }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-top: 0;
+  }
+
+  .tab {
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .panel { display: none; padding: 32px; }
+  .panel.active { display: block; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+    font-size: 12px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #151515;
+    vertical-align: middle;
+  }
+
+  tr:hover td { background: #131313; }
+
+  input[type="number"], input[type="text"] {
+    background: #0D0D0D;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 6px 10px;
+    width: 110px;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"] { width: 180px; }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .name-cell {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .sub-cell {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .save-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .save-btn:hover { opacity: 0.85; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .save-all-btn {
+    background: var(--good);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .save-all-btn:hover { opacity: 0.85; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--good);
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.error { background: var(--danger); color: #fff; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #1A1A1A;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .badge.trc20 { color: #E84142; border-color: #E84142; }
+  .badge.erc20 { color: #627EEA; border-color: #627EEA; }
+  .badge.bep20 { color: #F3BA2F; border-color: #F3BA2F; }
+  .badge.sol   { color: #9945FF; border-color: #9945FF; }
+  .badge.btc   { color: #F7931A; border-color: #F7931A; }
+  .badge.xrp   { color: #346AA9; border-color: #346AA9; }
+
+  .loading {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 20px 0;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 160px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Transfer<span>IQ</span> Admin</h1>
+  <div class="status-pill">
+    <div class="dot" id="statusDot"></div>
+    <span id="statusText">Connecting...</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('remit')">💸 Remittance Fees</div>
+  <div class="tab" onclick="switchTab('crypto')">₿ Crypto Fees</div>
+  <div class="tab" onclick="switchTab('clicks')">📊 Click Events</div>
+</div>
+
+<!-- REMITTANCE PANEL -->
+<div class="panel active" id="panel-remit">
+  <p class="section-title">Remittance Services — Edit fees and save</p>
+  <button class="save-all-btn" onclick="saveAllRemit()">💾 Save All Changes</button>
+  <div id="remitTable" class="loading">Loading...</div>
+</div>
+
+<!-- CRYPTO PANEL -->
+<div class="panel" id="panel-crypto">
+  <p class="section-title">Crypto Withdrawal Fees — Edit and save</p>
+  <button class="save-all-btn" onclick="saveAllCrypto()">💾 Save All Changes</button>
+  <div id="cryptoTable" class="loading">Loading...</div>
+</div>
+
+<!-- CLICKS PANEL -->
+<div class="panel" id="panel-clicks">
+  <p class="section-title">Click Events — Real-time tracking data</p>
+  <div class="stats-row" id="statsRow"></div>
+  <div id="clicksTable" class="loading">Loading...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── 설정 ───────────────────────────────────────────────
+  const SUPABASE_URL = 'https://fwlleigtngjklisivobo.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_IxQO0aPsYJlxvRQVE4xjAw_W7ZGrJVz';
+  // ──────────────────────────────────────────────────────
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+  };
+
+  let remitData = [];
+  let cryptoData = [];
+
+  async function fetchData(table, params = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, { headers });
+    return res.json();
+  }
+
+  async function updateRow(table, id, fields) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify(fields),
+    });
+    return res.ok;
+  }
+
+  // ── 탭 전환 ───────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', ['remit','crypto','clicks'][i] === tab);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+
+    if (tab === 'remit')  loadRemit();
+    if (tab === 'crypto') loadCrypto();
+    if (tab === 'clicks') loadClicks();
+  }
+
+  // ── 토스트 ────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isError ? ' error' : '') + ' show';
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── REMITTANCE ────────────────────────────────────────
+  async function loadRemit() {
+    const data = await fetchData('remittance_fees', 'order=name.asc');
+    remitData = data;
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Fixed Fee (USD)</th>
+            <th>% Fee</th>
+            <th>FX Markup</th>
+            <th>Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(r => `
+            <tr>
+              <td class="name-cell">${r.name}<br><span class="sub-cell">${r.type}</span></td>
+              <td><input type="number" step="0.01" id="r_fixed_${r.id}" value="${r.fixed_fee_usd}"></td>
+              <td><input type="number" step="0.0001" id="r_pct_${r.id}" value="${r.percent_fee}"></td>
+              <td><input type="number" step="0.0001" id="r_fx_${r.id}" value="${r.fx_markup}"></td>
+              <td><input type="text" id="r_speed_${r.id}" value="${r.speed}"></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+    document.getElementById('remitTable').innerHTML = html;
+  }
+
+  async function saveAllRemit() {
+    let ok = 0;
+    for (const r of remitData) {
+      const fixed   = parseFloat(document.getElementById(`r_fixed_${r.id}`)?.value);
+      const pct     = parseFloat(document.getElementById(`r_pct_${r.id}`)?.value);
+      const fx      = parseFloat(document.getElementById(`r_fx_${r.id}`)?.value);
+      const speed   = document.getElementById(`r_speed_${r.id}`)?.value;
+      const success = await updateRow('remittance_fees', r.id, {
+        fixed_fee_usd: fixed, percent_fee: pct, fx_markup: fx, speed, updated_at: new Date().toISOString()
+      });
+      if (success) ok++;
+    }
+    showToast(`✅ ${ok}/${remitData.length} providers saved!`);
+  }
+
+  // ── CRYPTO ────────────────────────────────────────────
+  async function loadCrypto() {
+    const data = await fetchData('crypto_withdrawal_fees', 'order=exchange.asc,coin.asc');
+    cryptoData = data;
+
+    const networkBadge = (n) => {
+      const cls = n.toLowerCase();
+      return `<span class="badge ${cls}">${n}</span>`;
+    };
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Exchange</th>
+            <th>Coin</th>
+            <th>Network</th>
+            <th>Withdraw Fee</th>
+            <th>Trading Fee</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(r => `
+            <tr>
+              <td class="name-cell">${r.exchange}</td>
+              <td><strong>${r.coin}</strong></td>
+              <td>${networkBadge(r.network)}</td>
+              <td><input type="number" step="0.00001" id="c_wd_${r.id}" value="${r.withdraw_fee}"></td>
+              <td><input type="number" step="0.00001" id="c_tr_${r.id}" value="${r.trading_fee}"></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+    document.getElementById('cryptoTable').innerHTML = html;
+  }
+
+  async function saveAllCrypto() {
+    let ok = 0;
+    for (const r of cryptoData) {
+      const wd = parseFloat(document.getElementById(`c_wd_${r.id}`)?.value);
+      const tr = parseFloat(document.getElementById(`c_tr_${r.id}`)?.value);
+      const success = await updateRow('crypto_withdrawal_fees', r.id, {
+        withdraw_fee: wd, trading_fee: tr, updated_at: new Date().toISOString()
+      });
+      if (success) ok++;
+    }
+    showToast(`✅ ${ok}/${cryptoData.length} routes saved!`);
+  }
+
+  // ── CLICKS ────────────────────────────────────────────
+  async function loadClicks() {
+    const data = await fetchData('click_events', 'order=created_at.desc&limit=200');
+
+    // 통계
+    const total = data.length;
+    const remit  = data.filter(d => d.provider_type === 'remittance').length;
+    const crypto = data.filter(d => d.provider_type === 'crypto').length;
+    const providers = [...new Set(data.map(d => d.provider_name))].length;
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Clicks</div><div class="stat-value">${total}</div></div>
+      <div class="stat-card"><div class="stat-label">Remittance</div><div class="stat-value" style="color:var(--good)">${remit}</div></div>
+      <div class="stat-card"><div class="stat-label">Crypto</div><div class="stat-value" style="color:var(--accent)">${crypto}</div></div>
+      <div class="stat-card"><div class="stat-label">Providers</div><div class="stat-value" style="color:var(--warn)">${providers}</div></div>
+    `;
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Provider</th>
+            <th>Type</th>
+            <th>Coin/Network</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Amount</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(r => `
+            <tr>
+              <td class="sub-cell">${new Date(r.created_at).toLocaleString()}</td>
+              <td class="name-cell">${r.provider_name || '—'}</td>
+              <td><span class="badge">${r.provider_type || '—'}</span></td>
+              <td class="sub-cell">${r.coin ? r.coin + ' / ' + r.network : '—'}</td>
+              <td>${r.from_currency || '—'}</td>
+              <td>${r.to_currency || '—'}</td>
+              <td>${r.amount ? '$' + Number(r.amount).toLocaleString() : '—'}</td>
+              <td>${r.rank || '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+    document.getElementById('clicksTable').innerHTML = html;
+  }
+
+  // ── 초기화 ────────────────────────────────────────────
+  async function init() {
+    try {
+      await fetchData('click_events', 'limit=1');
+      document.getElementById('statusDot').classList.add('live');
+      document.getElementById('statusText').textContent = 'Connected';
+      loadRemit();
+    } catch(e) {
+      document.getElementById('statusText').textContent = 'Error';
+      showToast('Connection failed', true);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
