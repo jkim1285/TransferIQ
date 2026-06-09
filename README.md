@@ -45,10 +45,10 @@ All providers are benchmarked against a **single ExchangeRate-API live mid-marke
 
 ## 📸 Screenshots
 
-![Main](screenshots/screenshot_main.jpg)
-![Compare](screenshots/screenshot_compare.jpg)
-![Remit](screenshots/screenshot_remit.jpg)
-![Crypto](screenshots/screenshot_crypto.jpg)
+![Main](screenshot_main.jpg)
+![Compare](screenshot_compare.jpg)
+![Remit](screenshot_remit.jpg)
+![Crypto](screenshot_crypto.jpg)
 
 ---
 
